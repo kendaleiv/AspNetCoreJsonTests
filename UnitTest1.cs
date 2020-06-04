@@ -84,7 +84,9 @@ namespace AspNetCoreJsonTests
             {
                 // Required for test to pass, by default
                 // there's a case mismatch that isn't automatically handled
-                PropertyNameCaseInsensitive = true
+                PropertyNamingPolicy = JsonNamingPolicy.CamelCase
+                // or
+                // PropertyNameCaseInsensitive = true
             });
 
             AssertTestObjectIsHydrated(responseObj);
