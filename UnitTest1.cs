@@ -1,5 +1,4 @@
 using System.Linq;
-using System.Net;
 using System.Net.Http;
 using System.Text;
 using System.Text.Json;
@@ -42,10 +41,9 @@ namespace AspNetCoreJsonTests
         {
             var serialized = Newtonsoft.Json.JsonConvert.SerializeObject(TestObject);
 
-            // Supports everything as long as properties are
-            // not initialized with Enumerable.Empty<T>()
-            Assert.Throws<Newtonsoft.Json.JsonSerializationException>(() =>
-                Newtonsoft.Json.JsonConvert.DeserializeObject<TestObject>(serialized));
+            var deserialized = Newtonsoft.Json.JsonConvert.DeserializeObject<TestObject>(serialized);
+
+            AssertTestObjectIsHydrated(deserialized);
         }
 
         [Fact]
@@ -121,10 +119,13 @@ namespace AspNetCoreJsonTests
                 Encoding.UTF8,
                 "application/json"));
 
-            // Enumerable.Empty<T> usage results in 400 Bad Request.
-            // Without the Enumerable.Empty<T> initializations returns
-            // the expected response with camelCase property names
-            Assert.Equal(HttpStatusCode.BadRequest, response.StatusCode);
+            response.EnsureSuccessStatusCode();
+
+            var strContent = await response.Content.ReadAsStringAsync();
+
+            var responseObj = Newtonsoft.Json.JsonConvert.DeserializeObject<TestObject>(strContent);
+
+            AssertTestObjectIsHydrated(responseObj);
         }
 
         private static void AssertTestObjectIsHydrated(TestObject obj)
